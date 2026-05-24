@@ -13,4 +13,4 @@ async def test_root():
 async def test_calculate_validation():
     async with AsyncClient(app=app, base_url="http://test") as ac:
         response = await ac.post("/calculate/", json={"numbers": [1], "delays": ["invalid"]})
-    assert response.status_code == 422 # Ошибка валидации Pydantic
+    assert response.status_code == 422
