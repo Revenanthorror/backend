@@ -21,6 +21,10 @@ class AppealCreate(BaseModel):
     @field_validator('last_name', 'first_name')
     @classmethod
     def name_must_be_cyrillic_and_capitalized(cls, v: str) -> str:
+        """
+        Бизнес-валидация: проверяет, что имя/фамилия написаны на кириллице 
+        и начинаются со строгой заглавной буквы. Помогает избежать «мусорных» данных.
+        """
         if not re.match(r'^[А-ЯЁ][а-яё]*$', v):
             raise ValueError('Должно начинаться с заглавной буквы и содержать только кириллицу')
         return v
@@ -33,6 +37,15 @@ class AppealCreate(BaseModel):
             raise ValueError('Номер телефона должен быть российским (+7 или 8)')
         if (cleaned.startswith('+7') and len(cleaned) != 12) or (cleaned.startswith('8') and len(cleaned) != 11):
             raise ValueError('Неверная длина номера телефона')
+        return v
+    @field_validator('birth_date')
+    @classmethod
+    def birth_date_must_be_in_past(cls, v: date) -> date:
+        """
+        Проверяет, что дата рождения не находится в будущем или не является сегодняшним днем.
+        """
+        if v >= date.today():
+            raise ValueError('Ты че в будущем родился? Дата рождения должна быть в прошлом')
         return v
 
 class CalculationRequest(BaseModel):

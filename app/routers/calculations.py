@@ -6,6 +6,10 @@ from app.schemas.schemas import CalculationRequest, CalculationResponse, Individ
 router = APIRouter(prefix="/calculate", tags=["calculations"])
 
 async def calculate_square(number: int, delay: float) -> IndividualResult:
+    """
+    Вспомогательная корутина для имитации долгого вычисления (возведение в квадрат).
+    Использует неблокирующий asyncio.sleep для демонстрации асинхронности.
+    """
     start_time = time.perf_counter()
     await asyncio.sleep(delay)
     square = number ** 2
