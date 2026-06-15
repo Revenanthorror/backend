@@ -3,7 +3,7 @@ from app.routers import auth, appeals, calculations
 
 app = FastAPI(
     title="Итоговый проект",
-    description="API с аутентификацией, базой данных и асинхронными вычислениями."
+    description="API с аутентификацией, RBAC, базой данных и асинхронными вычислениями."
 )
 
 app.include_router(auth.router)
