@@ -28,7 +28,7 @@ docker exec -it <web_container> python make_admin.py admin admin123
 
 ## Запуск тестов
 ```bash
-pytest -v
+docker exec -it backend-web-1 pytest -v
 ```
 
 ## Структура проекта

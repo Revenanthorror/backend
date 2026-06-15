@@ -61,8 +61,7 @@ async def test_login_and_me(client):
 
 @pytest.mark.asyncio
 async def test_create_appeal_authorized(auth_client):
-    ac = await auth_client
-    response = await ac.post("/appeals/", json={
+    response = await auth_client.post("/appeals/", json={
         "last_name": "Петров",
         "first_name": "Петр",
         "birth_date": "1985-05-05",
@@ -76,14 +75,12 @@ async def test_create_appeal_authorized(auth_client):
 
 @pytest.mark.asyncio
 async def test_list_appeals_user_only_own(client):
-    # Регистрация двух пользователей
     for u in ["user1", "user2"]:
         await client.post("/auth/register", json={"username": u, "password": "testpass123"})
 
     login1 = await client.post("/auth/login", data={"username": "user1", "password": "testpass123"})
     token1 = login1.json()["access_token"]
 
-    # user1 создает обращение
     await client.post("/appeals/", json={
         "last_name": "Сидоров",
         "first_name": "Сидор",
@@ -92,15 +89,13 @@ async def test_list_appeals_user_only_own(client):
         "email": "sidor@example.com"
     }, headers={"Authorization": f"Bearer {token1}"})
 
-    # user1 видит только свое обращение
     response = await client.get("/appeals/", headers={"Authorization": f"Bearer {token1}"})
     assert response.status_code == 200
     assert len(response.json()) == 1
 
 @pytest.mark.asyncio
 async def test_get_appeal_by_id(auth_client):
-    ac = await auth_client
-    create = await ac.post("/appeals/", json={
+    create = await auth_client.post("/appeals/", json={
         "last_name": "Кузнецов",
         "first_name": "Кузьма",
         "birth_date": "1992-02-02",
@@ -109,14 +104,13 @@ async def test_get_appeal_by_id(auth_client):
     })
     appeal_id = create.json()["id"]
 
-    response = await ac.get(f"/appeals/{appeal_id}")
+    response = await auth_client.get(f"/appeals/{appeal_id}")
     assert response.status_code == 200
     assert response.json()["id"] == appeal_id
 
 @pytest.mark.asyncio
 async def test_delete_appeal(auth_client):
-    ac = await auth_client
-    create = await ac.post("/appeals/", json={
+    create = await auth_client.post("/appeals/", json={
         "last_name": "Удалов",
         "first_name": "Удал",
         "birth_date": "1993-03-03",
@@ -125,11 +119,10 @@ async def test_delete_appeal(auth_client):
     })
     appeal_id = create.json()["id"]
 
-    response = await ac.delete(f"/appeals/{appeal_id}")
+    response = await auth_client.delete(f"/appeals/{appeal_id}")
     assert response.status_code == 204
 
-    # Проверяем, что удалено
-    get_resp = await ac.get(f"/appeals/{appeal_id}")
+    get_resp = await auth_client.get(f"/appeals/{appeal_id}")
     assert get_resp.status_code == 404
 
 @pytest.mark.asyncio
@@ -142,8 +135,8 @@ async def test_sql_injection_safe(client):
     assert res.status_code != 200
 
 @pytest.mark.asyncio
-async def test_phone_validation(client):
-    response = await client.post("/appeals/", json={
+async def test_phone_validation(auth_client):
+    response = await auth_client.post("/appeals/", json={
         "last_name": "Иванов",
         "first_name": "Иван",
         "birth_date": "1990-01-01",
@@ -153,8 +146,8 @@ async def test_phone_validation(client):
     assert response.status_code == 422
 
 @pytest.mark.asyncio
-async def test_name_validation(client):
-    response = await client.post("/appeals/", json={
+async def test_name_validation(auth_client):
+    response = await auth_client.post("/appeals/", json={
         "last_name": "ivanov",
         "first_name": "Иван",
         "birth_date": "1990-01-01",
@@ -175,10 +168,8 @@ async def test_change_password(client):
     }, headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
 
-    # Проверяем, что старый пароль не работает
     old_login = await client.post("/auth/login", data={"username": "passuser", "password": "oldpass123"})
     assert old_login.status_code == 400
 
-    # Новый пароль работает
     new_login = await client.post("/auth/login", data={"username": "passuser", "password": "newpass456"})
     assert new_login.status_code == 200

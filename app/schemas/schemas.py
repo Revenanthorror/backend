@@ -1,7 +1,7 @@
 import re
 from datetime import date, datetime
 from enum import Enum
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel, EmailStr, field_validator, ConfigDict
 from typing import List
 
 class UserRole(str, Enum):
@@ -16,9 +16,7 @@ class UserResponse(BaseModel):
     id: int
     username: str
     role: UserRole
-
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class Token(BaseModel):
     access_token: str
@@ -64,9 +62,7 @@ class AppealResponse(BaseModel):
     phone: str
     email: str
     created_at: datetime
-
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class CalculationRequest(BaseModel):
     numbers: List[int]
